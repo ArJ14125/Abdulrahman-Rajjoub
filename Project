@@ -1,0 +1,185 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+ 
+#                                      Q1 Data Exploration
+# I used pandas to load the dataset
+df = pd.read_csv("c:/Users/ArJ/Downloads/population.csv")
+# Q1. Data Exploration
+#Reshape the dataset to organise years as columns if necessary.
+ 
+ 
+ 
+# I have reshaped the dataset: Pivoting the data to have years as columns, index as country name and value to be population
+df_reshaped = df.pivot(index='country name', columns='year', values='population')
+# Displaying the reshaped dataset
+print(df_reshaped.head())
+# Here to dispaly the type of the columns
+print(df.dtypes)
+# I used .isnull to check for missing or null values in my dataset
+print(df_reshaped.isnull())
+ 
+#                                     Q2 Analysis Questions
+ 
+#Q2,1
+#Countries with No Population Data in 2000
+#How many countries had no recorded population data (0) for the year 2000?
+#List these countries along with their regions.
+ 
+# I simply mad e a varialble where I made 2 condentions inside it and they are df which is year to only equal 2000 and popoulation to equal 0
+filtered_df = df[(df['year'] == 2000) & (df['population'] == 0)]
+ #I selected relevant columns for easy view
+countries_with_0_population = filtered_df[['country name', 'population' , 'continent','year']]
+print(countries_with_0_population)
+ 
+#Q2, 2
+#Total Population of Africa in 2010
+#Calculate the total population for all African countries in 2010.
+#Create a bar chart showing the population distribution across African countries in 2010.
+ 
+# I Calculated the total population in Africa in 2010 by first selcting the condestions I want and then to use the sum to add them all up
+Year = 2010
+ 
+Africa_population_year = df[(df['continent'] == 'Africa') & (df['year'] == Year)]
+total_population = Africa_population_year[['population']].sum()
+# I printed what I want to show but this time I used 'f' because it will allow me to print the variables that I made and the text I want
+print(f"Africa's population in {Year} is {total_population}.")
+ 
+# I Created a bar chart for African countries in 2010
+
+all_population = Africa_population_year[['population']]
+all_countries_africa = df[(df['continent'] == 'Africa')]
+all_countries_africa_pivot = all_countries_africa['country name']
+all_countries_africa_pivot_year = (all_countries_africa['year'] == '2010')
+ 
+# Pivoting African countries to create data for plotting
+ 
+bar_pivot = df.pivot_table(index= all_countries_africa_pivot, columns= all_countries_africa_pivot_year, values=all_population)
+ 
+ 
+# now I just pluted my chart and how I want it to look like
+bar_pivot.plot(kind='bar', figsize=(10, 6))
+plt.title('Population Distribution Across African Countries in 2010')
+plt.xlabel('Country')
+plt.ylabel('Population')
+plt.show()
+ 
+#Q2, 3
+#Average Population of South America in 2000
+#Determine the average population of countries in South America for the year 2000.
+#Highlight countries with populations above and below this average. Include the lists in your analysis.
+south_american_2000 = df[(df['continent'] == 'South America') & (df['year'] == 2000)]
+ 
+#Here I used .mean() to calculate the avg
+mean_population = south_american_2000['population'].mean()
+print(south_american_2000)
+print(f"Average population of South America in 2000 is {mean_population}.")
+ 
+#larger than the avg
+population_large = df[(df['continent'] == 'South America') & (df['population'] > mean_population)]
+#less then than avg
+population_less = df[(df['continent'] == 'South America') & (df['population'] < mean_population)]
+print(population_large)
+print(population_less)
+#Q2, 4
+#Population > 1000 in 2007
+#Identify the countries with populations exceeding 1000 million in 2007.
+#Create a bar chart or scatter plot to display all countries' populations in 2007, marking those above 1000.
+ 
+ 
+# Identifing the countries with populations exceeding 1000 million in 2007.
+filtered_df = df[(df['population'] > 1000) & (df['year'] == 2007)]
+print(filtered_df[['country name' , 'year' , 'population']])
+# Extracting the data for 2007 and plot a bar chart for the top 5 countries
+df_2007 = df[df['year'] == 2007]
+top_5_countries = df_2007.sort_values(by='population', ascending=False).head()
+pivot_df = df_2007.pivot_table(index= 'country name', columns= df_2007['year'] , values='population')
+plt.figure(figsize=(10, 7))
+bars = plt.bar(top_5_countries['country name'], top_5_countries['population'], color='lightblue')
+# I used her a for,if loop to highlight countries with population exceeding 1000 million in orange
+for bar, country in zip(bars, top_5_countries['country name']):
+    if top_5_countries.loc[top_5_countries['country name'] == country, 'population'].values[0] > 1000:
+        bar.set_color('orange')
+ 
+# some labels and titles
+plt.xlabel('country name')
+plt.ylabel('population')
+plt.title('population of Countries in 2007')
+plt.tight_layout()
+plt.show()
+ 
+ 
+#Q2, 5
+#Population Growth in Europe (2000 to 2010)
+#Calculate the total population growth in Europe between 2000 and 2010.
+#Identify the top 5 European countries by population growth during this period.
+#Create a line plot showing the population changes of these countries from 2000 to 2010.
+ 
+ 
+# Filtered the data for Europe between 2000 and 2010
+europe_data = df[df['continent'] == 'Europe']
+europe_data_2000_2010 = europe_data[europe_data['year'].isin([2000, 2010])]
+ 
+# Pivot tabel for the data to have 'country name' as the index, 'year' as columns, and 'population' as values
+pivot_europe = europe_data_2000_2010.pivot_table(index='country name', columns='year', values='population')
+ 
+# I calculated the population growth from 2000 to 2010 using .sum() and taking away 2000 pop from 2010 pop
+from_2000_2010 = pivot_europe[2010].sum() - pivot_europe[2000].sum()
+pivot_europe['growth'] = pivot_europe[2010] - pivot_europe[2000]
+ 
+# Sorted the countries by population growth and got the top 5 using .head(), also ascending= false to detrmine which way
+top_5_growth_countries = pivot_europe.sort_values(by='growth', ascending=False).head()
+ 
+print(pivot_europe)
+print("Top 5 European countries by population growth (2000 to 2010):")
+print(top_5_growth_countries[['growth']])
+print(from_2000_2010)
+ 
+#Extracting the data for plotting population changes for the top 5 countries
+top_5_countries_data = pivot_europe.loc[top_5_growth_countries.index, [2000, 2010]]
+ 
+# Plotting the population chart changes from 2000 to 2010 for the top 5 countries
+ 
+plt.figure(figsize=(10, 6))
+for country in top_5_countries_data.index:
+    plt.plot(top_5_countries_data.columns, top_5_countries_data.loc[country], marker='o', label=country)
+ 
+# I made the labels and title
+plt.xlabel('Year')
+plt.ylabel('Population')
+plt.title('Population Growth in Europe (2000 to 2010)')
+plt.legend(title='Country')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+
+
+
+#Q3                    Additional Insights
+#I willm be identifing the country with the highest average population growth per decade
+
+# I start with creating a new column to calculate yearly growth rate per country, The growth rates are averaged for each country using .groupby() and .mean().
+# I also used the diff() function to compute the yearly population growth for each country by subtracting the population of the previous year.
+df['population_growth'] = df.groupby('country name')['population'].diff()
+average_growth = df.groupby('country name')['population_growth'].mean().sort_values(ascending=False)
+
+# Ishowed the country with the highest average yearly population growts using .idxmax() and .max().
+highest_growth_country = average_growth.idxmax()
+highest_growth_value = average_growth.max()
+
+print(f"The country with the highest average yearly population growth is {highest_growth_country}, "
+      f"with an average yearly growth of {highest_growth_value:.2f} people.")
+
+# Now to make a graph I ploted the yearly growth rates for the top 5 countries by average growth
+top_5_growth_countries = average_growth.head()
+plt.figure(figsize=(10, 6))
+top_5_growth_countries.plot(kind='bar', color='skyblue')
+
+# Added labels and titles
+plt.title("Top 5 Countries by Average Yearly Population Growth")
+plt.xlabel("Country Name")
+plt.ylabel("Average Yearly Population Growth")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.show()
