@@ -1,0 +1,65 @@
+---Q1
+SELECT BusinessEntityID
+
+	,JobTitle
+
+	,VacationHours
+
+FROM AdventureWorks2022.HumanResources.Employee
+ 
+SELECT BusinessEntityID
+
+	,JobTitle
+
+	,VacationHours
+
+FROM AdventureWorks2022.HumanResources.Employee
+
+ORDER BY VacationHours DESC
+
+---Q2
+SELECT SUM(p.population) AS total_population_2010
+FROM population_years p
+JOIN countries c 
+ON p.country_id = c.id
+WHERE c.continent = 'Africa' 
+AND p.year = 2010;
+
+
+---Q3
+SELECT AVG(p.population) AS average_population_2000
+FROM population_years p
+JOIN countries c 
+ON p.country_id = c.id
+WHERE c.continent = 'South America' 
+AND p.year = 2000;
+
+
+---Q4
+SELECT  c.name, p.population
+FROM countries c
+JOIN population_years p 
+ON c.id = p.country_id
+WHERE p.year = 2007
+ AND p.population IS NOT NULL
+ORDER BY p.population ASC
+limit 1; 
+
+---Q5
+SELECT 
+    EU_2010.total_population_2010 - EU_2000.total_population_2000 AS total_population_growth
+FROM 
+    (SELECT SUM(p.population) AS total_population_2000
+     FROM countries c
+     JOIN population_years p 
+     ON c.id = p.country_id
+     WHERE c.continent = 'Europe' 
+     AND p.year = 2000
+     AND p.population IS NOT NULL) AS EU_2000,
+    (SELECT SUM(p.population) AS total_population_2010
+     FROM countries c
+     JOIN population_years p 
+     ON c.id = p.country_id
+     WHERE c.continent = 'Europe' 
+     AND p.year = 2010
+     AND p.population IS NOT NULL) AS EU_2010;
